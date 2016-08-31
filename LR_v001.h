@@ -21,17 +21,27 @@ struct watermelon
 {
 	double density;  //密度
 	double sugar_content; //含糖率
-	bool   good_t; //好瓜
+	bool   good_tag; //好瓜
 };
 
 class LR 
 {
 public:
-	void read_parameters(int argc, char* argv[], char *training_filename, char* new_data_filename);
-	int train();
-	int save_model();
-	int classify();
+	LR();
+	~LR();
+	void read_parameters(int argc, char* argv[]);
+	void print_help();
+	//int train();
+	void save_model();
+	//int classify();
 private:
 	int N_train_data;
-	int D_data;
+	int N_data_attribute;
+	double** data_set;
+	double*  data;
+
+	int N_max_loop;
+    char training_data_filename[200];
+    char model_param_filename[200];
+
 };
