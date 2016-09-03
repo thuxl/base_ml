@@ -31,17 +31,23 @@ public:
 	~LR();
 	void read_parameters(int argc, char* argv[]);
 	void print_help();
+	void read_samp_file();
 	//int train();
 	void save_model();
 	//int classify();
 private:
 	int N_train_data;
 	int N_data_attribute;
-	double** data_set;
-	double*  data;
+    vector<double>  weight;
+	double    b;
+    
+	vector<double *>  data_x_set;
+	vector<int>       y_set;
+	//double*  signle_data;
+	
 
 	int N_max_loop;
-    char training_data_filename[200];
+    char sample_data_filename[200];
     char model_param_filename[200];
 
 };
