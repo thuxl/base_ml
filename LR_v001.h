@@ -14,7 +14,8 @@
 #include <string.h>
 
 # define VERSION       "V0.01"
-# define VERSION_DATE  "2016-8-26"
+# define VERSION_DATE  "2016-8-26" 
+
 
 using namespace std;
 
@@ -35,14 +36,14 @@ public:
 	void read_samp_file();
 	double wx_b(int data_i);
 	double p1(int data_i);
+	double inner_product(int data_i);
 	void train_model();
 	void save_model();
 	//int classify();
 private:
 	int N_train_data;
 	int N_attribute;
-    vector<double>  weight;
-	double    b;
+    vector<double>  weight; //the last element of weight is b;
     
 	vector<double *>  data_x_set;
 	vector<int>       y_set;
