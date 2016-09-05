@@ -11,6 +11,7 @@
 #include <climits>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 # define VERSION       "V0.01"
 # define VERSION_DATE  "2016-8-26"
@@ -32,12 +33,14 @@ public:
 	void read_parameters(int argc, char* argv[]);
 	void print_help();
 	void read_samp_file();
-	//int train();
+	double wx_b(int data_i);
+	double p1(int data_i);
+	void train_model();
 	void save_model();
 	//int classify();
 private:
 	int N_train_data;
-	int N_data_attribute;
+	int N_attribute;
     vector<double>  weight;
 	double    b;
     

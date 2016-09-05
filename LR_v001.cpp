@@ -11,29 +11,31 @@ LR::LR()
 	memset(model_param_filename, 0, 200);
 	N_max_loop = 200;
 	N_train_data = 0;
-	N_data_attribute = 2;
+	N_attribute = 2;
 	//signle_data = NULL;
 }
 LR::~LR()
 {
 	//release
 	for (int i=0; i<N_train_data; i++ )
-		delete [] data_set[i];
-	data_set.clear();
+		delete [] data_x_set[i];
+	data_x_set.clear();
+	y_set.clear();
 }
 
 
 
-void LR::save_model(string model_file)
+void LR::save_model()
 { 
     cout << "Saving model..." << endl;
-    ofstream fout(model_file.c_str());
-    for (int k = 0; k < feat_set_size; k++) {
-        for (int j = 0; j < class_set_size; j++) {
-            fout << omega[k][j] << " ";
-        }
-        fout << endl;
-    }
+    ofstream fout(model_param_filename );
+    //for (int k = 0; k < feat_set_size; k++) {
+        //for (int j = 0; j < class_set_size; j++) {
+            //fout << omega[k][j] << " ";
+        //}
+        //fout << endl;
+    //}
+	fout << "test";
     fout.close();
 }
 
@@ -59,7 +61,7 @@ void LR::read_samp_file() {
 	//the format is m lines data each of which contains d+1 colomns (d attributes and 1 result)
     ifstream fin(sample_data_filename);
     if(!fin) {
-        cerr << "Error opening file: " << samp_file << endl;
+        cerr << "Error opening file: " << sample_data_filename << endl;
         exit(0);
     }
 	N_train_data = 0;
@@ -69,40 +71,30 @@ void LR::read_samp_file() {
 		char *endptr;
         size_t margin_pos = line_str.find_first_of("\t");
 		double v = strtod(line_str.substr(0, margin_pos).c_str(), &endptr);
+
 		string sub1 = line_str.substr(margin_pos+1);
         margin_pos = sub1.find_first_of("\t");
 		double v2 = strtod(sub1.substr(0, margin_pos).c_str(), &endptr);
+
         margin_pos = sub1.find_last_of("\t");
-        int y = atoi(line_str.substr(margin_pos+1, 1).c_str());
+        int y = atoi(sub1.substr(margin_pos+1, 1).c_str());
+
+		double *_x = new doulbe[2]();
+		_x[0] = v; _x[1] = v2;
 
 
-
-        samp_class_vec.push_back(class_id);
-        string terms_str = line_str.substr(class_pos+1);
-        sparse_feat samp_feat;
-        samp_feat.id_vec.push_back(0); // bias
-        samp_feat.value_vec.push_back(1); // bias
-        if (terms_str != "") 
-        {
-            vector<string> fv_vec = string_split(terms_str, " ");
-            for (vector<string>::iterator it = fv_vec.begin(); it != fv_vec.end(); it++) 
-            {
-                size_t feat_pos = it->find_first_of(":");
-                int feat_id = atoi(it->substr(0, feat_pos).c_str());
-                float feat_value = (float)atof(it->substr(feat_pos+1).c_str());
-                samp_feat.id_vec.push_back(feat_id);
-                samp_feat.value_vec.push_back(feat_value);
-            }
-        }
-        samp_feat_vec.push_back(samp_feat);
+		data_x_set.push_back(_x);
+		y_set.clear(y);
+		N_train_data++;
     }
     fin.close();
 }
 
 
-void LR::read_parameters(int argc, char* argv[], char *training_filename, char* new_data_filename)
+void LR::read_parameters(int argc, char* argv[] )
 {
-	for (int i = 1; (i<argc) && (argv[i])[0]=='-'; i++) 
+	int i=1;
+	for ( ; (i<argc) && (argv[i])[0]=='-'; i++) 
     {
         switch ((argv[i])[1]) {
             case 'h':
@@ -115,7 +107,7 @@ void LR::read_parameters(int argc, char* argv[], char *training_filename, char* 
                 //N_train_data = atoi(argv[++i]);
                 //break;
             case 'd':
-                N_data_attribute = atoi(argv[++i]);
+                N_attribute = atoi(argv[++i]);
                 break;
 			default:
                 cout << "Unrecognized option: " << argv[i] << "!" << endl;
@@ -134,15 +126,53 @@ void LR::read_parameters(int argc, char* argv[], char *training_filename, char* 
 	strcpy (sample_data_filename, argv[i]);
     strcpy (model_param_filename, argv[i+1]);
 
+}
 
+double LR::wx_b(int data_i)
+{//calculate w^T * x + b for data_i data in data_x_set
+	double wx=0;
+	for (int i=0; i<N_attribute; i++)
+		wx += weight[i] * data_x_set[data_i][i];
+	return wx+b;
+}
+double LR::p1(int data_i)
+{//p1_i = p(y=1|xi) = exp(wx_b(i)) / (1+exp(wx_b(i))) ;
+	return exp(wx_b(data_i)) / (1.0 + exp(wx_b(data_i))); 
+}
 
+void LR::train_model()
+{
+	//initialize w
+	double w = (double) 1 / N_attribute;
+	weight.clear();
+	for (int i=0; i<N_attribute; i++)
+		weight.push_back(w);
+	b=1.0;
+
+	//training by Newton method.
+	//beta = (w; b), is a vector that is target to be approached.
+	//d1_beta is first-order derivative  of l(beta) on beta.
+	//d2_beta is second-order derivative of l(beta) on beta.
+	vector <double> beta, d1_beta, d2_beta;
+	for ()
+	for (int k=0; k<N_max_loop; k++ )
+	{
+		for (int i=0; i<N_train_data; i++ )
+		{
+		}
+	}
 }
 
 int main(int argc, char* argv[])
 {
 
-	for (int i=0; i<argc; i++)
-	{
-		cout << "argv["<<i<<"]="<<argv[i] << ".\n";
-	}
+	//for (int i=0; i<argc; i++)
+		//cout << "argv["<<i<<"]="<<argv[i] << ".\n";
+	LR lr;
+	lr.read_parameters(argc, argv);
+	lr.read_samp_file();
+	//lr.train_model();
+	lr.save_model();
+	//lr.classify();
+
 }
