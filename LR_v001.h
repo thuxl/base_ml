@@ -37,6 +37,12 @@ public:
 	double wx_b(int data_i);
 	double p1(int data_i);
 	double inner_product(int data_i);
+	void get_d1_beta(vector <double> &d1_beta );
+	void get_d2_beta(vector < vector<double> > &d2_beta);
+	void get_Algebraic_Cofactor(vector < vector<double> > A, vector < vector<double> > &ans, int n);
+	double get_det(vector < vector<double> > A, int n);
+	bool GetMatrixInverse(vector < vector<double> > src,  vector < vector<double> > &des, int n);
+	void matrix_multiply_vector(vector < vector<double> > A,  vector < double > B, vector < double > &C, int m, int n );
 	void train_model();
 	void save_model();
 	//int classify();
