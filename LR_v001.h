@@ -45,7 +45,8 @@ public:
 	void matrix_multiply_vector(vector < vector<double> > A,  vector < double > B, vector < double > &C, int m, int n );
 	void train_model();
 	void save_model();
-	//int classify();
+	void load_model();
+	void classify();
 private:
 	int N_train_data;
 	int N_attribute;
@@ -57,7 +58,8 @@ private:
 	
 
 	int N_max_loop;
-    char sample_data_filename[200];
-    char model_param_filename[200];
+    char sample_data_filename[100];
+    char model_param_filename[100];
+    char newsample_filename[100];
 
 };

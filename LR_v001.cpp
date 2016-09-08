@@ -7,8 +7,10 @@
 
 LR::LR()
 {
-	memset(sample_data_filename, 0, 200);
-	memset(model_param_filename, 0, 200);
+	memset(sample_data_filename, 0, 100);
+	memset(model_param_filename, 0, 100);
+	memset(newsample_filename, 0, 100);
+	
 	N_max_loop = 200;
 	N_train_data = 0;
 	N_attribute = 2;
@@ -24,21 +26,54 @@ LR::~LR()
 }
 
 
-
 void LR::save_model()
 { 
     cout << "Saving model..." << endl;
     ofstream fout(model_param_filename );
 	for (int i=0; i<N_attribute+1; i++)
-		fout<<weight[i]<<"\t";
+		if (i==0)
+			fout<<weight[i];
+		else
+			fout<<"\t"<<weight[i];
 	fout << "\n";
     fout.close();
+}
+
+void LR::load_model()
+{
+	cout << "Loading model..." << endl;
+    weight.clear();
+    ifstream fin( model_param_filename );
+    if(!fin) {
+        cerr << "Error opening file: " << model_param_filename << endl;
+        exit(0);
+    }
+    string line_str;
+    while (getline(fin, line_str)) {
+
+		char *p, *endptr, line[100]={0};
+		
+		strcpy(line, line_str.c_str());
+		p = strtok(line, "\t");
+		while (p)
+		{
+			weight.push_back (strtod(p, &endptr) );
+			p = strtok(NULL, "\t");
+		}
+
+    }
+    fin.close();
+
+	for (int i=0; i<weight.size(); i++)
+		cout <<"weight["<<i<<"]="<<weight[i]<<"\n";
+ 
 }
 
 void LR::print_help() 
 {
     cout << "\nLR training module, " << VERSION << ", " << VERSION_DATE << "\n\n"
-        << "usage: pLR_v001 [options] training_data_file model_parameter_file \n\n"
+        << "usage: pLR_v001 [options] training_data_file model_parameter_file new_sample_file\n\n"
+		<< "e.g., ./pLR_v001 -l 10 -d 2 LR_v001_train_set LR_v001_model LR_v001_newsample"
         << "options: -h        -> help\n"
         << "         -l int    -> maximal iteration loops (default 200)\n"
         << "         -d int    -> the number of attributes of data (default 2)\n"
@@ -86,8 +121,9 @@ void LR::read_parameters(int argc, char* argv[] )
         exit(0);
     }
 
-	strcpy (sample_data_filename, argv[i]);
-    strcpy (model_param_filename, argv[i+1]);
+	strcpy (sample_data_filename, argv[i++]);
+    strcpy (model_param_filename, argv[i++]);
+    strcpy (newsample_filename, argv[i]);
 
 }
 
@@ -314,6 +350,44 @@ void LR::train_model()
 
 }
 
+void LR::classify()
+{
+	ifstream fin(newsample_filename);
+    if(!fin) {
+        cerr << "Error opening file: " << newsample_filename << endl;
+        exit(0);
+    }
+
+    string line_str;
+	vector <double> nx(N_attribute, 0);
+	cout << "start classify...\n";
+    while (getline(fin, line_str))
+    {
+		char *p, *endptr, line[100]={0};
+		int i=0;
+		
+		strcpy(line, line_str.c_str());
+		p = strtok(line, "\t");
+		while (p)
+		{
+			//cout<<i<<","<<p<<",";
+
+			nx[i] = strtod(p, &endptr);
+			p = strtok(NULL, "\t");
+			cout << nx[i] << "\t";
+			i++;
+		}
+
+		//use model to classify sample.
+		double s=0;
+		int j=0;
+		for (; j<N_attribute; j++ )
+			s+= nx[j] * weight[j];
+		s+= weight[j];
+		cout << " ->> y= 1/(1+exp(-(wx+b)))=" << 1.0/(1.0+exp(-s)) << "\n";
+	}
+}
+
 int main(int argc, char* argv[])
 {
 
@@ -324,6 +398,10 @@ int main(int argc, char* argv[])
 	lr.read_samp_file();
 	lr.train_model();
 	lr.save_model();
-	//lr.classify();
+	lr.load_model();
+	lr.classify();
+
+
+	return 0;
 
 }
